@@ -72,7 +72,7 @@ public class Main {
                 mp3sToFetch.add(mp3Link.attr("href"));
             }
         }
-        log.info(mp3sToFetch.toString());
+
         return mp3sToFetch;
     }
 }

@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.json.JsonObjectParser;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -18,20 +17,17 @@ import org.apache.commons.io.IOUtils;
  */
 public class URLListFetcher implements Callable<String> {
 
-    private final NetHttpTransport netHttpTransport;
-    private final JacksonFactory jsonFactory;
+    private final NetHttpTransport netHttpTransport = new NetHttpTransport();
     private final String urlToFetch;
 
     public URLListFetcher(String url) {
         urlToFetch = url;
-        netHttpTransport = new NetHttpTransport();
-        jsonFactory = new JacksonFactory();
     }
 
     public String call() throws IOException {
         GenericUrl url = new GenericUrl(urlToFetch);
         HttpRequestFactory requestFactory =
-                netHttpTransport.createRequestFactory( (request) -> request.setParser(new JsonObjectParser(jsonFactory)));
+                netHttpTransport.createRequestFactory();
         HttpRequest request = requestFactory.buildGetRequest(url);
         StringWriter sw = new StringWriter();
         IOUtils.copy(request.execute().getContent(), sw, StandardCharsets.UTF_8);
