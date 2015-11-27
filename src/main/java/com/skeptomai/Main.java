@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 public class Main {
     private static final Logger log = Logger.getLogger(Main.class.getName());
@@ -24,38 +26,35 @@ public class Main {
     }
 
     private static void fetchMP3s(List<String> mp3sToFetch) {
-        List<Future<String>> fl = new ArrayList<>();
 
         final ExecutorService pool = Executors.newFixedThreadPool(5);
 
         ListeningExecutorService executor = MoreExecutors
                 .listeningDecorator(pool);
 
-        for (String mp3ToFetch : mp3sToFetch) {
-            log.info(mp3ToFetch);
-
-            ListenableFuture<String> lf = executor.submit(new MP3Fetcher(mp3ToFetch));
-            fl.add(lf);
+        final List<ListenableFuture<String>> collect =  mp3sToFetch.stream().map((s) -> {
+            ListenableFuture<String> lf = executor.submit(new MP3Fetcher(s));
 
             Futures.addCallback(lf, new FutureCallback<String>() {
                 public void onSuccess(String result) {
                     System.out.println("Gettin' called back: " + result);
                 }
-
+                @ParametersAreNonnullByDefault
                 public void onFailure(Throwable thrown) {
                     System.out.println("Shit! Failed: " + thrown.getMessage());
                 }
             });
 
-        }
+            return lf;
 
-        for (Future<String> fi : fl){
-            try {
-                String result = fi.get();
-                System.out.println("actually made it past get..: " + result);
-            } catch (ExecutionException | InterruptedException ee) {
-                log.severe("Interrupted future.  World weeps");
-            }
+        }).collect(Collectors.toList());
+
+
+        ListenableFuture<List<String>> lf1 = Futures.successfulAsList(collect);
+        try {
+            lf1.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
 
         log.info("Finished fetches.  All done..");
