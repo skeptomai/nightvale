@@ -1,7 +1,6 @@
 package com.skeptomai;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
