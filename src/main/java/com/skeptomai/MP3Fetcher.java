@@ -54,10 +54,10 @@ public class MP3Fetcher implements Callable<String> {
             try(InputStream is = request.execute().getContent();
                 FileOutputStream outputStream = new FileOutputStream(f)) {
                 //f.deleteOnExit();
-                ByteStreams.copy(is, outputStream);
+                final long copy = ByteStreams.copy(is, outputStream);
 
                 Path pathTempMP3 = f.toPath();
-                log.info("Moving " + pathTempMP3.toString() + " to " + pathFinalMP3.toString());
+                log.info("Moving " + pathTempMP3.toString() + " to " + pathFinalMP3.toString()+ " , size=" + String.valueOf(copy));
                 Files.move(pathTempMP3, pathFinalMP3);
             }
 
