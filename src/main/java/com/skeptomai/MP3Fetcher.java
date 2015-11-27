@@ -4,8 +4,6 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonObjectParser;
-import com.google.api.client.json.jackson2.JacksonFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,13 +19,11 @@ public class MP3Fetcher implements Callable<String> {
     private static final Logger log = Logger.getLogger(MP3Fetcher.class.getName());
 
     private final NetHttpTransport netHttpTransport;
-    private final JacksonFactory jsonFactory;
 
     private String urlToFetch;
 
     public MP3Fetcher(String url) {
         netHttpTransport = new NetHttpTransport();
-        jsonFactory = new JacksonFactory();
         urlToFetch = url;
     }
 
@@ -48,8 +44,7 @@ public class MP3Fetcher implements Callable<String> {
         } else {
             GenericUrl url = new GenericUrl(urlToFetch);
             HttpRequestFactory requestFactory =
-                    netHttpTransport.createRequestFactory((request) -> request.setParser(
-                            new JsonObjectParser(jsonFactory)));
+                    netHttpTransport.createRequestFactory();
 
             HttpRequest request = requestFactory.buildGetRequest(url);
             InputStream is = request.execute().getContent();
