@@ -32,22 +32,25 @@ public class Main {
         ListeningExecutorService executor = MoreExecutors
                 .listeningDecorator(pool);
 
-        final List<ListenableFuture<String>> collect =  mp3sToFetch.stream().map((s) -> {
-            ListenableFuture<String> lf = executor.submit(new MP3Fetcher(s));
+        final List<ListenableFuture<String>> collect =
+                mp3sToFetch
+                        .stream()
+                        .map((s) -> {
+                            ListenableFuture<String> lf = executor.submit(new MP3Fetcher(s));
 
-            Futures.addCallback(lf, new FutureCallback<String>() {
-                public void onSuccess(String result) {
-                    System.out.println("Gettin' called back: " + result);
-                }
-                @ParametersAreNonnullByDefault
-                public void onFailure(Throwable thrown) {
-                    System.out.println("Shit! Failed: " + thrown.getMessage());
-                }
-            });
+                            Futures.addCallback(lf, new FutureCallback<String>() {
+                                public void onSuccess(String result) {
+                                    System.out.println("Gettin' called back: " + result);
+                                }
+                                @ParametersAreNonnullByDefault
+                                public void onFailure(Throwable thrown) {
+                                    System.out.println("Shit! Failed: " + thrown.getMessage());
+                                }
+                            });
 
-            return lf;
+                            return lf;
 
-        }).collect(Collectors.toList());
+                        }).collect(Collectors.toList());
 
 
         ListenableFuture<List<String>> lf1 = Futures.successfulAsList(collect);
