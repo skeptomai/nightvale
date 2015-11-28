@@ -27,7 +27,7 @@ public class Main {
 
     private static void fetchMP3s(List<String> mp3sToFetch) {
 
-        final ExecutorService pool = Executors.newFixedThreadPool(5);
+        final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         ListeningExecutorService executor = MoreExecutors
                 .listeningDecorator(pool);
