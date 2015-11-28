@@ -3,7 +3,6 @@ package com.skeptomai;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.util.ByteStreams;
 
 import java.io.File;
@@ -16,17 +15,18 @@ import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 public class MP3Fetcher implements Callable<String> {
-    private static final String outputDir = System.getProperty("user.dir");
+    private final String outputDir;
     private static final Logger log = Logger.getLogger(MP3Fetcher.class.getName());
 
-    private static final NetHttpTransport netHttpTransport = new NetHttpTransport();
-    private static final HttpRequestFactory requestFactory =
-            netHttpTransport.createRequestFactory();
+    private final HttpRequestFactory requestFactory;
 
     private String urlToFetch;
 
-    public MP3Fetcher(String url) {
-        urlToFetch = url;
+    public MP3Fetcher(String s, String outputDir,
+                      HttpRequestFactory requestFactory) {
+        urlToFetch = s;
+        this.outputDir = outputDir;
+        this.requestFactory = requestFactory;
     }
 
     public String call() throws IOException, IllegalArgumentException {

@@ -1,5 +1,7 @@
 package com.skeptomai;
 
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.util.concurrent.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,12 +33,18 @@ public class Main {
 
         ListeningExecutorService executor = MoreExecutors
                 .listeningDecorator(pool);
+        String outputDir = System.getProperty("user.dir");
+        NetHttpTransport netHttpTransport = new NetHttpTransport();
+        HttpRequestFactory requestFactory =
+                netHttpTransport.createRequestFactory();
+
 
         final List<ListenableFuture<String>> collect =
                 mp3sToFetch
                         .stream()
                         .map((s) -> {
-                            ListenableFuture<String> lf = executor.submit(new MP3Fetcher(s));
+                            ListenableFuture<String> lf =
+                                    executor.submit(new MP3Fetcher(s, outputDir, requestFactory));
 
                             Futures.addCallback(lf, new FutureCallback<String>() {
                                 public void onSuccess(String result) {
