@@ -11,8 +11,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 
 public class MP3Fetcher implements Callable<String> {
     private final String outputDir;
@@ -47,24 +50,28 @@ public class MP3Fetcher implements Callable<String> {
             GenericUrl url = new GenericUrl(urlToFetch);
 
             HttpRequest request = requestFactory.buildGetRequest(url);
-
-            File f = File.createTempFile("mp3fetcher", ".mp3");
-            log.info(f.getAbsolutePath());
-
-            try(InputStream is = request.execute().getContent();
-                FileOutputStream outputStream = new FileOutputStream(f)) {
-                //f.deleteOnExit();
-                final long copy = ByteStreams.copy(is, outputStream);
-
-                Path pathTempMP3 = f.toPath();
-                log.info("Moving " + pathTempMP3.toString() + " to " + pathFinalMP3.toString()+ " , size=" + String.valueOf(copy));
-                Files.move(pathTempMP3, pathFinalMP3);
-            }
-
-
+            File f = downloadToTempFile(request);
+            Path pathTempMP3 = f.toPath();
+            moveToFile(pathTempMP3, pathFinalMP3);
         }
 
         return pathFinalMP3.toString();
+    }
+
+    static private File downloadToTempFile(HttpRequest request) throws IOException {
+        File f = File.createTempFile("mp3fetcher", ".mp3");
+        log.info(f.getAbsolutePath());
+        try(InputStream is = request.execute().getContent();
+            FileOutputStream outputStream = new FileOutputStream(f)) {
+            long copy = ByteStreams.copy(is, outputStream);
+            log.info("copying " + String.valueOf(copy) + " bytes");
+        }
+        return f;
+    }
+
+    static private void moveToFile(Path inPath, Path outPath) throws IOException {
+        log.info("Moving " + inPath.toString() + " to " + outPath.toString());
+        Files.move(inPath, outPath, ATOMIC_MOVE);
     }
 
 
